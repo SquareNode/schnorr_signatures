@@ -50,17 +50,18 @@ class EC:
 		if point.y ** 2 % self.p == (point.x ** 3 + self.a * point.x + self.b) % self.p:
 			return True
 		return False
-		
-	#TODO DOUBLE AND ADD
+	
 	def n_times_g(self, n):
 		if n == 0:
 			return EC_point('inf', 'inf')
 			
 		res = self.g
-		for x in range(n-1):
-			res = EC_point.add(res, self.g, self)
-			# print(res)
-			
+		n = bin(n)[3:]
+		for b in n:
+			res = EC_point.add(res, res, self)
+			if b == '1':
+				res = EC_point.add(res, self.g, self)
+		
 		return res
 		
 	def n_times_point(self, point, n):
@@ -69,8 +70,12 @@ class EC:
 			raise Exception('point not on curve')
 		
 		res = point
-		for x in range(n-1):
-			res = EC_point.add(res, point, self)
+		n = bin(n)[3:]
+		for b in n:
+			res = EC_point.add(res, res, self)
+			if b == '1':
+				res = EC_point.add(res, point, self)
+				
 		return res
 
 class EC_point:
@@ -129,8 +134,6 @@ if __name__ == '__main__':
 	ec = EC(2,2,17,EC_point(6,3))
 	print(ec)
 	
-	print(ec.n_times_g(25))
-	
+	print(ec.n_times_g(3))
 	print(ec.on_curve(EC_point(13,7)))
-	
 	print(EC_point.add(EC_point(3,1), EC_point(3,1), ec))
