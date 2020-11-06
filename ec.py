@@ -21,8 +21,15 @@ def inverse(a, m):
 		return x % m
 
 class EC:
-	
+	"""
+	y^2 = x^3 + a*x + b % p
+	with a generator point g
+	where a,b belong to Zp
+	and a 4a^3 + 27b^2 != 0 % p 
+	"""
 	def __init__(self, a,b,p,g):
+		if a >= p or b >= p or 4*a**3 + 27*b**2 % p == 0:
+			raise Exception('invalid ec params')
 		self.a = a
 		self.b = b
 		self.p = p
@@ -34,7 +41,8 @@ class EC:
 		
 	
 	def __str__(self):
-		return f'y ^ 2 = x ^ 3 +{self.a} * x + {self.b} mod {self.p}, generator {self.g}, |G| = {self.size}'
+		return f'y ^ 2 = x ^ 3 +{self.a} * x + {self.b} mod {self.p},' + \
+		f'generator {self.g}, |G| = {self.size}'
 	
 	#naive approach
 	def get_size(self):
@@ -47,7 +55,8 @@ class EC:
 	def on_curve(self, point):
 		if point.x == point.y == 'inf':
 			return True
-		if point.y ** 2 % self.p == (point.x ** 3 + self.a * point.x + self.b) % self.p:
+		if point.y ** 2 % self.p == \
+		(point.x ** 3 + self.a * point.x + self.b) % self.p:
 			return True
 		return False
 	
@@ -58,9 +67,9 @@ class EC:
 		res = self.g
 		n = bin(n)[3:]
 		for b in n:
-			res = EC_point.add(res, res, self)
+			res = res.add(res, self)
 			if b == '1':
-				res = EC_point.add(res, self.g, self)
+				res = res.add(self.g, self)
 		
 		return res
 		
@@ -72,9 +81,9 @@ class EC:
 		res = point
 		n = bin(n)[3:]
 		for b in n:
-			res = EC_point.add(res, res, self)
+			res = res.add(res, self)
 			if b == '1':
-				res = EC_point.add(res, point, self)
+				res = res.add(point, self)
 				
 		return res
 
@@ -98,34 +107,33 @@ class EC_point:
 			return True
 		return False
 		
-	@classmethod
-	def double(cls, p, ec):
-		s = ((3 * p.x**2 + ec.a) % ec.p) * inverse(2 * p.y % ec.p, ec.p)
-		x = (s ** 2 - 2*p.x) % ec.p
-		y = (s * ((p.x - x) % ec.p) - p.y) % ec.p
+	def double(self, ec):
+		s = ((3 * self.x**2 + ec.a) % ec.p) * \
+		inverse(2 * self.y % ec.p, ec.p)
+		x = (s ** 2 - 2*self.x) % ec.p
+		y = (s * ((self.x - x) % ec.p) - self.y) % ec.p
 		
 		return EC_point(x,y)
 	
-	@classmethod
-	def inverse(cls, point, ec):
-		return EC_point(point.x, -point.y % ec.p)
+	def inverse(self, ec):
+		return EC_point(self.x, -self.y % ec.p)
 	
-	@classmethod
-	def add(cls,p,q,ec):
-		if p.is_inf():
+	def add(self,q,ec):
+		if self.is_inf():
 			return q
 		if q.is_inf():
-			return p		
-		if not ec.on_curve(p) and ec.on_curve(q):
+			return self
+		if not ec.on_curve(self) and ec.on_curve(q):
 			raise Exception('points not on curve')
-		if p == q:
-			return cls.double(p, ec)
-		if q == cls.inverse(p, ec):
+		if self == q:
+			return self.double(ec)
+		if q == self.inverse(ec):
 			return EC_point('inf', 'inf')
 		
-		s = (((q.y - p.y) % ec.p )* inverse((q.x - p.x) % ec.p, ec.p)) % ec.p
-		x = (s ** 2 - p.x - q.x) % ec.p
-		y = (s * ((p.x - x) % ec.p) - p.y) % ec.p
+		s = (((q.y - self.y) % ec.p ) * \
+		inverse((q.x - self.x) % ec.p, ec.p)) % ec.p
+		x = (s ** 2 - self.x - q.x) % ec.p
+		y = (s * ((self.x - x) % ec.p) - self.y) % ec.p
 			
 		return EC_point(x,y)	
 		
@@ -136,4 +144,5 @@ if __name__ == '__main__':
 	
 	print(ec.n_times_g(3))
 	print(ec.on_curve(EC_point(13,7)))
-	print(EC_point.add(EC_point(3,1), EC_point(3,1), ec))
+	print(EC_point(3,1).add(EC_point(3,1), ec))
+	print(EC_point(3,1).add(EC_point(3,1).inverse(ec), ec))

@@ -8,13 +8,13 @@ def schnorr(ec):
 	
 	print(f'(k, K) = ({k} , {K})')
 	
-	#1. prover generates a random int a belonging to Zp*
+	#1. prover generates a random int a belonging to Zp
 	#computes a*G and sends to verifier
 	a = randint(1,ec.size)
 	res = ec.n_times_g(a)
 	print(f'step 1: a = {a}, res = {res}')
 		
-	#2. the verifier generates a random challenge c belongig to Zp*
+	#2. the verifier generates a random challenge c belonging to Zp
 	#sends c to prover
 	
 	c = randint(1,ec.size)
@@ -40,7 +40,7 @@ def h(point):
 
 def get_sign(k, K, ec):
 	
-	#1. generate a random num a belonging to Zp*
+	#1. generate a random num a belonging to Zp
 	#and compute a*G
 	a = randint(1, ec.size)
 	res = ec.n_times_g(a)
@@ -84,7 +84,7 @@ def h_msg(msg, point):
 
 def get_msg_sign(msg, k, K, ec):
 	
-	#1. generate a random num a belongin to Zp*
+	#1. generate a random num a belonging to Zp
 	#and compute a*G
 	a = randint(1, ec.size)
 	res = ec.n_times_g(a)
