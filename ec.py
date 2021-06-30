@@ -9,7 +9,7 @@ def eea(a, b):
 		g, y, x = eea(b % a, a)
 		return (g, x - (b // a) * y, y)
 
-def inverse(a, m):
+def get_mod_inverse(a, m):
 	"""
 	calculates modular inverse for a mod m 
 	(a*x)%m = 1
@@ -109,7 +109,7 @@ class EC_point:
 		
 	def double(self, ec):
 		s = ((3 * self.x**2 + ec.a) % ec.p) * \
-		inverse(2 * self.y % ec.p, ec.p)
+		get_mod_inverse(2 * self.y % ec.p, ec.p)
 		x = (s ** 2 - 2*self.x) % ec.p
 		y = (s * ((self.x - x) % ec.p) - self.y) % ec.p
 		
@@ -131,7 +131,7 @@ class EC_point:
 			return EC_point('inf', 'inf')
 		
 		s = (((q.y - self.y) % ec.p ) * \
-		inverse((q.x - self.x) % ec.p, ec.p)) % ec.p
+		get_mod_inverse((q.x - self.x) % ec.p, ec.p)) % ec.p
 		x = (s ** 2 - self.x - q.x) % ec.p
 		y = (s * ((self.x - x) % ec.p) - self.y) % ec.p
 			
@@ -146,3 +146,5 @@ if __name__ == '__main__':
 	print(ec.on_curve(EC_point(13,7)))
 	print(EC_point(3,1).add(EC_point(3,1), ec))
 	print(EC_point(3,1).add(EC_point(3,1).inverse(ec), ec))
+
+

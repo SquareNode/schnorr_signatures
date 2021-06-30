@@ -117,6 +117,7 @@ def msg_signing(msg, ec):
 	
 	verify_msg_sign(msg, sign, K, ec)
 
+
 if __name__ == '__main__':
 
 	ec = EC(2,2,17,EC_point(5,1))
